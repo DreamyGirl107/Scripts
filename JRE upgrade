@@ -1,0 +1,26 @@
+#!/bin/bash
+
+# List of servers
+servers=("10.23.51.40" "10.23.66.2" "10.23.51.249")
+
+# Output file
+output_file="java_version_report.txt"
+
+# Header for the output file
+echo "Server : Java Version" > "$output_file"
+
+# Loop through each server
+for server in "${servers[@]}"; do
+    # Get the Java version using the specified path
+    java_version=$(ssh "$server" "/opt/vmware-jre/bin/java -version 2>&1 | head -n 1 | awk -F '\"' '{print \$2}'")
+    
+    # Check if the command returned a valid Java version
+    if [[ -z "$java_version" ]]; then
+        java_version="Java not installed"
+    fi
+
+    # Append to the output file in the required format
+    echo "$server : $java_version" >> "$output_file"
+done
+
+echo "Java version report generated: $output_file"
