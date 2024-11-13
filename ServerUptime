@@ -1,0 +1,27 @@
+#!/bin/bash
+ 
+# List of servers
+servers=("10.23.59.19")
+ 
+# Output file
+output_file="server_report.csv"
+ 
+# Header for the CSV file
+echo "Server,Uptime,Last Reboot,Last Patch Date" > $output_file
+ 
+# Loop through each server
+for server in "${servers[@]}"; do
+    # Get uptime
+    uptime=$(ssh unixadm@$server "uptime -p")
+ 
+    # Get last reboot time
+    last_reboot=$(ssh unixadm@$server "who -b | awk '{print \$3, \$4}'")
+ 
+    # Get last patch date
+    last_patch=$(ssh unixadm@$server "yum history | grep 'Install' | head -1 | awk '{print \$1}' | xargs -I {} yum history info {} | grep 'End Time' | awk '{print \$3, \$4, \$5}'")
+ 
+    # Append to CSV file
+    echo "$server,$uptime,$last_reboot,$last_patch" >> $output_file
+done
+ 
+echo "Report generated: $output_file"
