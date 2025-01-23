@@ -1,0 +1,34 @@
+#!/bin/bash
+
+# List of servers
+servers=("10.23.93.108" "10.23.93.93" "10.23.94.48" "10.23.93.22" "10.23.51.9" "10.22.60.10" "10.23.94.33" "10.23.93.33" "10.23.93.109" "10.23.94.18" "10.23.93.90")
+
+# Output files for disk utilization
+output_var_file="var_disk_utilization.txt"
+output_opt_file="opt_disk_utilization.txt"
+
+# Header for the output files
+echo "Server : /var Disk Usage" > $output_var_file
+echo "Server : /opt Disk Usage" > $output_opt_file
+
+# Loop through each server
+for server in "${servers[@]}"; do
+    # Get disk usage for /var
+    var_usage=$(ssh unixadm@$server "df -h /var | tail -1 | awk '{print \$5}'")
+    # Get disk usage for /opt
+    opt_usage=$(ssh unixadm@$server "df -h /opt | tail -1 | awk '{print \$5}'")
+    
+    # Check if the command returned valid data for /var and /opt
+    if [[ -z "$var_usage" ]]; then
+        var_usage="Error fetching /var utilization"
+    fi
+    if [[ -z "$opt_usage" ]]; then
+        opt_usage="Error fetching /opt utilization"
+    fi
+
+    # Append to the output files in the required format
+    echo "$server : $var_usage" >> $output_var_file
+    echo "$server : $opt_usage" >> $output_opt_file
+done
+
+echo "Disk utilization report generated: $output_var_file and $output_opt_file"
