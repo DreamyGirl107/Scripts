@@ -1,0 +1,29 @@
+#!/bin/bash
+
+# Define the mount points to check
+MOUNT_POINT_A="/opt"
+MOUNT_POINT_B="/var"
+
+# Define the email details
+EMAIL_TO="sapna-ganesh.magar@capgemini.com"
+EMAIL_SUBJECT="Disk Usage Alert"
+
+# Define the threshold percentage
+THRESHOLD=70
+
+# Function to check disk usage and send email if it exceeds the threshold
+check_disk_usage() {
+    local mount_point=$1
+
+    # Get the disk usage percentage for the mount point
+    local usage=$(df -h "$mount_point" | awk 'NR==2 {print $5}' | sed 's/%//')
+
+    if [ "$usage" -ge "$THRESHOLD" ]; then
+        # Send an email if usage exceeds the threshold
+        echo "Warning: Disk usage on $mount_point has reached ${usage}%." | mail -s "$EMAIL_SUBJECT" "$EMAIL_TO"
+    fi
+}
+
+# Check the usage for both mount points
+check_disk_usage "$MOUNT_POINT_A"
+check_disk_usage "$MOUNT_POINT_B"
